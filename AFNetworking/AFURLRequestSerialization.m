@@ -111,6 +111,23 @@ NSString * AFPercentEscapedStringFromString(NSString *string) {
 
 @end
 
+@interface XF_NSURLRequest : NSObject
++ (NSMutableURLRequest *)xf_mutableCopyIfNeed:(NSURLRequest *)request;
+@end
+
+@implementation XF_NSURLRequest
++ (NSMutableURLRequest *)xf_mutableCopyIfNeed:(NSURLRequest *)request
+{
+    NSMutableURLRequest *mutableRequest = nil;
+    if ([request isKindOfClass:[NSMutableURLRequest class]]) {
+        mutableRequest = (NSMutableURLRequest *)request;
+    } else {
+        mutableRequest = [request mutableCopy];
+    }
+    return mutableRequest;
+}
+@end
+
 #pragma mark -
 
 FOUNDATION_EXPORT NSArray * AFQueryStringPairsFromDictionary(NSDictionary *dictionary);
@@ -373,7 +390,9 @@ forHTTPHeaderField:(NSString *)field
         }
     }
 
-    mutableRequest = [[self requestBySerializingRequest:mutableRequest withParameters:parameters error:error] mutableCopy];
+    NSURLRequest *request = [self requestBySerializingRequest:mutableRequest withParameters:parameters error:error];
+    
+    mutableRequest = [XF_NSURLRequest xf_mutableCopyIfNeed:request];
 
 	return mutableRequest;
 }
@@ -463,7 +482,7 @@ forHTTPHeaderField:(NSString *)field
         }
     });
 
-    NSMutableURLRequest *mutableRequest = [request mutableCopy];
+    NSMutableURLRequest *mutableRequest = [XF_NSURLRequest xf_mutableCopyIfNeed:request];
     mutableRequest.HTTPBodyStream = nil;
 
     return mutableRequest;
@@ -477,7 +496,7 @@ forHTTPHeaderField:(NSString *)field
 {
     NSParameterAssert(request);
 
-    NSMutableURLRequest *mutableRequest = [request mutableCopy];
+    NSMutableURLRequest *mutableRequest = [XF_NSURLRequest xf_mutableCopyIfNeed:request];
 
     [self.HTTPRequestHeaders enumerateKeysAndObjectsUsingBlock:^(id field, id value, BOOL * __unused stop) {
         if (![request valueForHTTPHeaderField:field]) {
@@ -681,7 +700,7 @@ NSTimeInterval const kAFUploadStream3GSuggestedDelay = 0.2;
 
 - (void)setRequest:(NSMutableURLRequest *)request
 {
-    _request = [request mutableCopy];
+    _request = [XF_NSURLRequest xf_mutableCopyIfNeed:request];
 }
 
 - (BOOL)appendPartWithFileURL:(NSURL *)fileURL
@@ -1246,7 +1265,7 @@ typedef enum {
         return [super requestBySerializingRequest:request withParameters:parameters error:error];
     }
 
-    NSMutableURLRequest *mutableRequest = [request mutableCopy];
+    NSMutableURLRequest *mutableRequest = [XF_NSURLRequest xf_mutableCopyIfNeed:request];
 
     [self.HTTPRequestHeaders enumerateKeysAndObjectsUsingBlock:^(id field, id value, BOOL * __unused stop) {
         if (![request valueForHTTPHeaderField:field]) {
@@ -1339,7 +1358,7 @@ typedef enum {
         return [super requestBySerializingRequest:request withParameters:parameters error:error];
     }
 
-    NSMutableURLRequest *mutableRequest = [request mutableCopy];
+    NSMutableURLRequest *mutableRequest = [XF_NSURLRequest xf_mutableCopyIfNeed:request];
 
     [self.HTTPRequestHeaders enumerateKeysAndObjectsUsingBlock:^(id field, id value, BOOL * __unused stop) {
         if (![request valueForHTTPHeaderField:field]) {
