@@ -490,7 +490,16 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
     }
 
     if (!configuration) {
-        configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+        if (xf_isKeyboardExternsionToAFNetworking)
+        {
+            configuration = [NSURLSessionConfiguration ephemeralSessionConfiguration];
+            configuration.URLCache = nil;
+            configuration.HTTPCookieStorage = nil;
+        }
+        else
+        {
+            configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+        }
     }
 
     self.sessionConfiguration = configuration;
